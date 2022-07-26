@@ -1,0 +1,84 @@
+import os
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import time
+import csv
+import pandas as pd
+
+
+dates = []
+orgins = []
+dests = []
+m = []
+r = []
+c = []
+l = []
+w = []
+sbt = []
+cont = "y"
+
+os.environ['PATH'] = r"C:\Users\Antonio\Documents\seleniumDrivers"
+driver = webdriver.Chrome()
+driver.get("https://login.dat.com/login?state=hKFo2SBOU21BVUtIODZheHFNQzhtaTRBS25LQ1BqdUZwZ05EMaFupWxvZ2luo3RpZNkgZmpBc2w0bURPVV93QXQ0VFFsbkhuTlpFNTdVc01KN0mjY2lk2SBYODdZQU5xTHF5M3JXYmxqM3FZVnhBNUFlazE1bmxkaw&client=X87YANqLqy3rWblj3qYVxA5Aek15nldk&protocol=oauth2&prompt=login&response_type=token%20id_token&redirect_uri=https:%2F%2Ftruckersedge.dat.com%2Fcallback&scope=openid%20profile%20email&audience=https:%2F%2Fprod-api.dat.com&app_name=TruckersEdge&page_mode=legacy&init_username=&view=login&email_readonly=false&nonce=oMxnw_2FlJvACRDCHcIBiQY2ijLipBjB&auth0Client=eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xOS4wIn0%3D&capturedTime=1658009718804")
+driver.implicitly_wait(10)
+user_name = driver.find_element("id", "mat-input-1")
+user_name.send_keys("info@leonardlogisticsllc.com")
+password = driver.find_element("id","mat-input-0")
+password.send_keys("F7o%f%M1")
+submit = driver.find_element("id", "submit-button").click()
+driver.maximize_window()
+
+def start():
+    count = 0
+    target = input("How Many? ")
+    while count < int(target):
+        try:
+            info = driver.find_element('id', 'search-card' + str(count))
+            date = info.find_element('css_selector','div[class="DAT-caption-one display-pickup ng-star-inserted"]')
+            orgin = info.find_element('css_selector','span[class="locale origin-locale truncate"]')
+            destination = info.find_element('css_selector','span[class="locale destination-locale truncate"]')
+            miles = info.find_element('css_selector','a[class="nowrap ng-star-inserted"]')
+            rate = info.find_element('css_selector','div[class="lower-cell rate-cell ng-star-inserted"]')
+            company = info.find_element('css_selector','span[class="contact-link"]')
+            lenght = info.find_element('css_selector','div[class="length"]')
+            weight = info.find_element('css_selector','span[class="amount"]')
+        except:
+            print("Error did not work")
+            target = 0
+        dates.append(date.text)
+        orgins.append(orgin.text)
+        dests.append(destination.text)
+        m.append(miles.text)
+        r.append(rate.text)
+        c.append(company.text)
+        #l.append(lenght.text)
+        w.append(weight.text)
+        count += 1
+
+answer = 'y'
+while answer == 'y':
+    start()
+    answer = input("Would you like to continue? ")
+
+signout = driver.find_element('id', 'oneweb-sign-out')
+signout.click()
+time.sleep(3)
+driver.quit()
+
+
+
+
+df = pd.DataFrame({
+    'Date' : dates,
+    'Orgin' : orgins,
+    'Destination': dests,
+    'Miles' : m,
+    'Rate' : r,
+    #'Lenght' : l,
+    'Weight' : w,
+    'Company' : c
+})
+
+
+df.to_csv('research.csv',mode='a', index=False, header=False)
+print(df)
